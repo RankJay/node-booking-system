@@ -23,7 +23,6 @@ const processBookings = (records: Array<[number, number]>) => {
   for (let row of records) {
     let [start, end] = row;
 
-    console.log(">>", start, typeof start);
     if (start === 0) {
       const index = end;
       if (index < 0 || index >= bookedIntervals.length) {
