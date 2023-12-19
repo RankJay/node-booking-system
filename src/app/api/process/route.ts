@@ -1,14 +1,19 @@
-import fs from 'fs';
-import { parse } from 'csv-parse/sync';
-import { NextResponse } from 'next/server';
+import fs from "fs";
+import { parse } from "csv-parse/sync";
+import { NextResponse } from "next/server";
 
 export function POST() {
-    const fileBuffer = fs.readFileSync('./public/test.csv');
-    const records = parse(fileBuffer, { delimiter:', ' });
+  const fileBuffer = fs.readFileSync("./public/test.csv");
+  const records = parse(fileBuffer, { delimiter: ", " }).map(
+    ([start, end]: [start: string, end: string]) => [
+      parseInt(start, 10),
+      parseInt(end, 10),
+    ]
+  );
 
-    const results = processBookings(records);
-    return NextResponse.json({ results });
-};
+  const results = processBookings(records);
+  return NextResponse.json({ results });
+}
 
 // Example implementation of processBookings
 const processBookings = (records: Array<[number, number]>) => {
@@ -18,6 +23,7 @@ const processBookings = (records: Array<[number, number]>) => {
   for (let row of records) {
     let [start, end] = row;
 
+    console.log(">>", start, typeof start);
     if (start === 0) {
       const index = end;
       if (index < 0 || index >= bookedIntervals.length) {
@@ -27,7 +33,9 @@ const processBookings = (records: Array<[number, number]>) => {
         results.push(`${start},${end} → Removed`);
       }
     } else {
-      let conflict = bookedIntervals.some(interval => start < interval[1] && end > interval[0]);
+      let conflict = bookedIntervals.some(
+        (interval) => start < interval[1] && end > interval[0]
+      );
       if (!conflict) {
         bookedIntervals.push([start, end]);
         results.push(`${start},${end} → true`);
